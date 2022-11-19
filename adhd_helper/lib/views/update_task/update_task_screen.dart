@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:hashpro/state/auth/providars/user_id_provider.dart';
 import 'package:hashpro/state/posts/typedefs/user_id.dart';
+import 'package:hashpro/state/providers/audio_pruvider.dart';
 import 'package:hashpro/state/tasks/providers/task_upload_provider.dart';
+import 'package:hashpro/views/components/record_audio_button.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 class UpdateTaskScreen extends ConsumerWidget {
@@ -46,6 +48,8 @@ class UpdateTaskScreen extends ConsumerWidget {
               decoration: const InputDecoration(labelText: 'Goal: '),
               controller: goalController,
             ),
+            const SizedBox(height: 20),
+            const RecordAidioButton(),
             const SizedBox(height: 40),
             TextButton(
               onPressed: () async {
@@ -55,16 +59,17 @@ class UpdateTaskScreen extends ConsumerWidget {
                     goal == null) {
                   // TODO: show dialog
                 } else {
+                  final audioFile = ref.read(audioProvider).audioFile;
                   final res =
                       await ref.read(taskUploadProvider.notifier).uploadTask(
                             deviceId: deviceIdController.text,
                             taskName: taskNameController.text,
                             goal: goal,
                             userId: userId,
+                            audioFile: audioFile,
                           );
                   if (!res) {
                     // TODO: show dialog
-                    print('not my');
                   } else {
                     Navigator.of(context).pop();
                   }

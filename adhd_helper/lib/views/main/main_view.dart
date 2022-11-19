@@ -3,7 +3,7 @@ import 'package:hashpro/state/auth/providars/auth_state_provider.dart';
 import 'package:hashpro/views/components/dialogs/alert_dialog_model.dart';
 import 'package:hashpro/views/components/dialogs/logout_dialog.dart';
 import 'package:hashpro/views/constants/strings.dart';
-import 'package:hashpro/views/tasks_screan.dart';
+import 'package:hashpro/views/tasks/tasks_screan.dart';
 import 'package:hashpro/views/update_task/update_task_screen.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 

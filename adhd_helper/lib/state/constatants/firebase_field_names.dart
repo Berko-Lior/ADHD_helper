@@ -15,5 +15,6 @@ class FirebaseFieldName {
   static const progress = 'progress';
   static const timestemps = 'timestemps';
   static const devices = 'devices';
+  static const audioFile = 'audio_file';
   const FirebaseFieldName._();
 }

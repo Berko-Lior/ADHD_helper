@@ -4,7 +4,7 @@ import 'package:hashpro/views/components/animations/empty_contents_with_text_ani
 import 'package:hashpro/views/components/animations/error_animation_view.dart';
 import 'package:hashpro/views/components/animations/loading_animation_view.dart';
 import 'package:hashpro/views/constants/strings.dart';
-import 'package:hashpro/views/tasks_list_view.dart';
+import 'package:hashpro/views/tasks/tasks_list_view.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 class TasksScreen extends StatefulHookConsumerWidget {

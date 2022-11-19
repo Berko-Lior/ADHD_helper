@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:hashpro/views/task_tile.dart';
+import 'package:hashpro/views/tasks/task_list_tile.dart';
 
 class TasksListView extends StatelessWidget {
   final List tasks;
@@ -11,7 +11,7 @@ class TasksListView extends StatelessWidget {
       itemCount: tasks.length,
       itemBuilder: (BuildContext context, int index) {
         return ListTile(
-          title: TaskTile(
+          title: TaskListTile(
             deviceId: tasks[index],
           ),
         );

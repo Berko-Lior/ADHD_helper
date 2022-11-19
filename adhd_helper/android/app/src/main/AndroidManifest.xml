@@ -1,5 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.adhd_helper">
+    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
    <application
         android:label="adhd_helper"
         android:name="${applicationName}"

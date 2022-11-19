@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "775052237529",
+    "firebase_url": "https://adhd-helper-bdfeb-default-rtdb.firebaseio.com",
+    "project_id": "adhd-helper-bdfeb",
+    "storage_bucket": "adhd-helper-bdfeb.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:775052237529:android:8012de2db71c426c653cc8",
+        "android_client_info": {
+          "package_name": "com.example.adhd_helper"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "775052237529-05qvjd1fds4f9tr9jm1h1q3q21r84qeu.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDjgxblauE_eisioCfOEiG79rz_W6RbaQU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "775052237529-05qvjd1fds4f9tr9jm1h1q3q21r84qeu.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

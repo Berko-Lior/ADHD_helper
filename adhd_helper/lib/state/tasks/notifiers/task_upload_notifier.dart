@@ -15,6 +15,7 @@ class TaskUploadNotifier extends StateNotifier<bool> {
     required String deviceId,
     required String taskName,
     required int goal,
+    required int timeForGoal,
     int progross = 0,
     File? audioFile,
     required UserId userId,
@@ -44,6 +45,8 @@ class TaskUploadNotifier extends StateNotifier<bool> {
             FirebaseFieldName.taskName: taskName,
             FirebaseFieldName.goal: goal,
             FirebaseFieldName.progress: progross,
+            FirebaseFieldName.timeForNextReset: timeForGoal,
+            FirebaseFieldName.timeForTask: timeForGoal,
           });
         }
       } else {
@@ -56,6 +59,8 @@ class TaskUploadNotifier extends StateNotifier<bool> {
           FirebaseFieldName.taskName: taskName,
           FirebaseFieldName.goal: goal,
           FirebaseFieldName.progress: progross,
+          FirebaseFieldName.timeForNextReset: timeForGoal,
+          FirebaseFieldName.timeForTask: timeForGoal,
           FirebaseFieldName.timestemps: {},
         });
       }

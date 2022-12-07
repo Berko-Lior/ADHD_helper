@@ -3,6 +3,8 @@ import 'package:flutter/foundation.dart' show immutable;
 @immutable
 class FirebaseFieldName {
   static const userId = 'uid';
+  static const timeForTask = 'time_for_task';
+  static const timeForNextReset = 'time_for_next_reset';
   static const postId = 'post_id';
   static const comment = 'comment';
   static const createdAt = 'created_at';

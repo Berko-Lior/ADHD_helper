@@ -15,7 +15,6 @@ class UserInfoPatload extends MapView<String, dynamic> {
             FirebaseFieldName.userId: userId,
             FirebaseFieldName.displayName: displayName ?? '',
             FirebaseFieldName.email: email ?? '',
-            FirebaseFieldName.devices: devices,
           },
         );
 }

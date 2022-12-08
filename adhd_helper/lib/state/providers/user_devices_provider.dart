@@ -12,17 +12,16 @@ final userDevicesProvider = StreamProvider.autoDispose<List>((ref) {
 
   final subscription = FirebaseFirestore.instance
       .collection(FirebaseCollectionName.users)
-      .where(
-        FirebaseFieldName.userId,
-        isEqualTo: userId,
-      )
-      .limit(1)
+      .doc(userId)
+      .collection(FirebaseCollectionName.devices)
       .snapshots()
       .listen(
     (snapshot) {
-      final doc = snapshot.docs.first;
-      final json = doc.data();
-      final userDevices = json[FirebaseFieldName.devices];
+      final docs = snapshot.docs;
+      final userDevices = [];
+      for (var doc in docs) {
+        userDevices.add(doc.data()[FirebaseFieldName.deviceId]);
+      }
       controller.add(userDevices);
     },
   );

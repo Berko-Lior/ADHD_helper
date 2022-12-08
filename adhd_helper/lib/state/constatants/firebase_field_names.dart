@@ -15,6 +15,7 @@ class FirebaseFieldName {
   static const deviceId = 'device_id';
   static const goal = 'goal';
   static const progress = 'progress';
+  static const pervProgress = 'prev_progress';
   static const timestemps = 'timestemps';
   static const devices = 'devices';
   static const audioFile = 'audio_file';

@@ -1,7 +1,9 @@
 import 'dart:io';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:hashpro/state/constatants/firebase_collection_name.dart';
 import 'package:hashpro/state/constatants/firebase_field_names.dart';
 import 'package:hashpro/state/posts/typedefs/user_id.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -45,6 +47,7 @@ class TaskUploadNotifier extends StateNotifier<bool> {
             FirebaseFieldName.taskName: taskName,
             FirebaseFieldName.goal: goal,
             FirebaseFieldName.progress: progross,
+            FirebaseFieldName.pervProgress: progross,
             FirebaseFieldName.timeForNextReset: timeForGoal,
             FirebaseFieldName.timeForTask: timeForGoal,
           });
@@ -53,8 +56,21 @@ class TaskUploadNotifier extends StateNotifier<bool> {
         if (audioFile != null) {
           await storageRef.putFile(audioFile);
         }
+        // connect the device to the user
+        FirebaseFirestore.instance
+            .collection(FirebaseCollectionName.users)
+            .doc(userId)
+            .collection(FirebaseCollectionName.devices)
+            .doc(deviceId)
+            .set(
+          {
+            FirebaseFieldName.deviceId: deviceId,
+          },
+        );
+
         // Create new task.
         await ref.set({
+          FirebaseFieldName.pervProgress: progross,
           FirebaseFieldName.userId: userId,
           FirebaseFieldName.taskName: taskName,
           FirebaseFieldName.goal: goal,

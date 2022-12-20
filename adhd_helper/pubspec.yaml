@@ -37,6 +37,8 @@ dependencies:
   permission_handler: ^10.2.0
   audioplayers: ^1.1.1
   file_picker: ^5.2.2
+  esp_smartconfig: ^1.1.10
+  esptouch_flutter: ^1.0.0
   
 
 dev_dependencies:

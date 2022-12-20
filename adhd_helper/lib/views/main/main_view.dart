@@ -3,6 +3,7 @@ import 'package:hashpro/state/auth/providars/auth_state_provider.dart';
 import 'package:hashpro/views/components/dialogs/alert_dialog_model.dart';
 import 'package:hashpro/views/components/dialogs/logout_dialog.dart';
 import 'package:hashpro/views/constants/strings.dart';
+import 'package:hashpro/views/esp_wifi_connect_screen.dart';
 import 'package:hashpro/views/tasks/tasks_screan.dart';
 import 'package:hashpro/views/update_task/update_task_screen.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -42,7 +43,7 @@ class _MainViewState extends ConsumerState<MainView> {
                 icon: Icon(Icons.person),
               ),
               Tab(
-                icon: Icon(Icons.person),
+                icon: Icon(Icons.wifi),
               ),
               Tab(
                 icon: Icon(Icons.person),

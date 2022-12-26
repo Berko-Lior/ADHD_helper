@@ -21,7 +21,6 @@ class PostsGridView extends StatelessWidget {
         return PostThumbnailView(
           post: currPost,
           onTapped: () {
-            // TODO: navigate to post details view.
           },
         );
       },

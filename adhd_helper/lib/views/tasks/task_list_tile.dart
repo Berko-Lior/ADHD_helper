@@ -21,6 +21,8 @@ class TaskListTile extends StatelessWidget {
           final int progress =
               snapshot.data.snapshot.value[FirebaseFieldName.progress];
           final int goal = snapshot.data.snapshot.value[FirebaseFieldName.goal];
+          final int timeForTask =
+              snapshot.data.snapshot.value[FirebaseFieldName.timeForTask];
 
           return GestureDetector(
             onLongPress: () => Navigator.of(context).push(
@@ -30,6 +32,7 @@ class TaskListTile extends StatelessWidget {
                   goal: goal,
                   progress: progress,
                   deviceId: deviceId,
+                  timeForGoal: timeForTask,
                 ),
               ),
             ),
@@ -41,16 +44,17 @@ class TaskListTile extends StatelessWidget {
                     style: const TextStyle(fontSize: 20),
                   ),
                   subtitle: Text(
-                    'Daily goal: $goal',
+                    'Daily goal: $goal\nTime for task: $timeForTask',
                     style: const TextStyle(fontSize: 15),
                   ),
                 ),
                 LinearPercentIndicator(
-                  lineHeight: 25.0,
-                  percent: progress <= goal ? progress / goal : 0.5,
-                  backgroundColor: Colors.grey,
-                  progressColor: Colors.blue,
-                ),
+                    lineHeight: 25.0,
+                    percent: progress <= goal ? progress / goal : 1,
+                    backgroundColor: Colors.grey,
+                    progressColor: Colors.blue,
+                    center: Text(
+                        '${((progress <= goal ? progress / goal : 1) * 100).toStringAsFixed(0)}%')),
               ],
             ),
           );

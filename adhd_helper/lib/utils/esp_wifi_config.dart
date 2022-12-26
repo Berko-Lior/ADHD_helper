@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:esp_smartconfig/esp_smartconfig.dart';
-import 'package:esptouch_flutter/esptouch_flutter.dart';
 
 void connectEspToWifi({
   required String ssid,

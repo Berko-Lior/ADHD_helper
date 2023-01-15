@@ -32,7 +32,7 @@ class UpdateTaskScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Add new task'),
+        title: const Text('Add/modify new task'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(30.0),
@@ -90,10 +90,10 @@ class UpdateTaskScreen extends ConsumerWidget {
                 }
               },
               style: TextButton.styleFrom(
-                backgroundColor: Colors.pink.withOpacity(0.7),
-                foregroundColor: Colors.yellow,
+                backgroundColor: Colors.lightBlue,
+                foregroundColor: Colors.white,
               ),
-              child: const Text('Add task'),
+              child: const Text('Update task'),
             ),
           ],
         ),

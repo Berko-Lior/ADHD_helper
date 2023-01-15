@@ -27,7 +27,7 @@ class _RecordAidioButtonState extends ConsumerState<RecordAidioButton> {
 
   Future record() async {
     if (!isRecorderReady) return;
-    await recorder.startRecorder(toFile: 'audio');
+    await recorder.startRecorder(toFile: 'audio.mp4');
     audioFile = null;
     duration = Duration.zero;
     position = Duration.zero;

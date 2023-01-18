@@ -1,12 +1,17 @@
 import 'dart:io';
 
 import 'package:audioplayers/audioplayers.dart' as audio;
+import 'package:ffmpeg_kit_flutter/ffmpeg_kit.dart';
+import 'package:ffmpeg_kit_flutter/ffmpeg_session.dart';
+import 'package:ffmpeg_kit_flutter/return_code.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_sound/flutter_sound.dart';
 import 'package:hashpro/state/providers/audio_pruvider.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:record_mp3/record_mp3.dart';
 
 class RecordAidioButton extends ConsumerStatefulWidget {
   const RecordAidioButton({super.key});
@@ -16,37 +21,80 @@ class RecordAidioButton extends ConsumerStatefulWidget {
       _RecordAidioButtonState();
 }
 
+bool isMp3File(String? path) {
+  if (path == null || path.length <= 3) return false;
+  final pathLen = path.length;
+  return path[pathLen - 1] == '3' &&
+      path[pathLen - 2] == 'p' &&
+      path[pathLen - 3] == 'm';
+}
+
 class _RecordAidioButtonState extends ConsumerState<RecordAidioButton> {
-  final recorder = FlutterSoundRecorder();
+  // final recorder = FlutterSoundRecorder();
   var audioPlayer = audio.AudioPlayer();
   bool isPlaying = false;
   Duration duration = Duration.zero;
   Duration position = Duration.zero;
   bool isRecorderReady = false;
   File? audioFile;
+  bool isComplete = true;
+  bool isMp3 = true;
 
   Future record() async {
-    if (!isRecorderReady) return;
-    await recorder.startRecorder(toFile: 'audio.mp4');
+    // if (!isRecorderReady) return;
+    // await recorder.startRecorder(toFile: 'audio.mp4');
+    final path = await getFilePath();
+    RecordMp3.instance.start(path, (type) {
+      Permission.microphone.request();
+    });
+    isComplete = false;
     audioFile = null;
     duration = Duration.zero;
     position = Duration.zero;
   }
 
-  Future stop() async {
-    if (!isRecorderReady) return;
+  Future<String> getFilePath() async {
+    final storageDirectory = await getTemporaryDirectory();
+    String path = "${storageDirectory.path}/record";
+    var d = Directory(path);
+    if (!d.existsSync()) {
+      d.createSync(recursive: true);
+    }
+    return "$path/audio.mp3";
+  }
 
-    final path = await recorder.stopRecorder();
+  Future stop() async {
+    // if (!isRecorderReady) return;
+
+    // final path = await recorder.stopRecorder();
+    RecordMp3.instance.stop();
+    final path = await getFilePath();
+    isMp3 = true;
 
     if (path != null) {
+      // String? mp3File = await mp4Tomp3(path);
+      // if (mp3File == null) return;
+
       audioPlayer.setSourceDeviceFile(path);
 
       setState(() {
+        isComplete = true;
         audioFile = File(path);
         ref.read(audioProvider).setFile(audioFile);
       });
     }
   }
+
+  // Future<String?> mp4Tomp3(path) async {
+  //   FFmpegSession session = await FFmpegKit.execute('-i $path my_audio.mp3');
+  //   final returnCode = await session.getReturnCode();
+
+  //   if (ReturnCode.isSuccess(returnCode)) {
+  //     return 'my_audio.mp3';
+  //   } else {
+  //     return null;
+  //   }
+  // }
 
   @override
   void initState() {
@@ -82,15 +130,15 @@ class _RecordAidioButtonState extends ConsumerState<RecordAidioButton> {
       throw 'Microphon permission not granted';
     }
 
-    await recorder.openRecorder();
+    // await recorder.openRecorder();
 
-    isRecorderReady = true;
-    recorder.setSubscriptionDuration(const Duration(microseconds: 500));
+    // isRecorderReady = true;
+    // recorder.setSubscriptionDuration(const Duration(microseconds: 500));
   }
 
   @override
   void dispose() {
-    recorder.closeRecorder();
+    // recorder.closeRecorder();
     audioPlayer.dispose();
 
     super.dispose();
@@ -118,7 +166,7 @@ class _RecordAidioButtonState extends ConsumerState<RecordAidioButton> {
           children: [
             ElevatedButton(
               onPressed: () async {
-                if (recorder.isRecording) {
+                if (!isComplete) {
                   await stop();
                 } else {
                   await record();
@@ -127,7 +175,7 @@ class _RecordAidioButtonState extends ConsumerState<RecordAidioButton> {
                 setState(() {});
               },
               child: Icon(
-                recorder.isRecording ? Icons.stop : Icons.mic,
+                !isComplete ? Icons.stop : Icons.mic,
               ),
             ),
             const SizedBox(
@@ -135,11 +183,13 @@ class _RecordAidioButtonState extends ConsumerState<RecordAidioButton> {
             ),
             ElevatedButton(
               onPressed: () async {
-                final result = await FilePicker.platform.pickFiles();
+                final result = await FilePicker.platform.pickFiles(
+                    type: FileType.custom, allowedExtensions: ['mp3']);
 
                 if (result != null) {
                   setState(() {
-                    audioFile = File(result.files.single.path!);
+                    isMp3 = isMp3File(result.paths.first);
+                    audioFile = isMp3 ? File(result.files.single.path!) : null;
                     audioPlayer.setSourceDeviceFile(result.files.single.path!);
                     ref.read(audioProvider).setFile(audioFile);
                   });
@@ -185,6 +235,15 @@ class _RecordAidioButtonState extends ConsumerState<RecordAidioButton> {
                       await audioPlayer.resume();
                     }
                   },
+                ),
+              ),
+        isMp3
+            ? const Text('')
+            : const Text(
+                'Audio mast be of mp3 format, pleas upload another audio file.',
+                style: TextStyle(
+                  color: Colors.red,
+                  fontSize: 12,
                 ),
               ),
       ],

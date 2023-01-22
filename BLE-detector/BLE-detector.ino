@@ -128,7 +128,8 @@ void loop() {
         
       if (deviceAddress == "ed:9a:29:07:bd:69" && deviceRSSI > -45)  
       {
-        Serial.println("+++++++++++++++++++++");        Serial.println("Detected!!!!");
+        Serial.println("+++++++++++++++++++++");        
+        Serial.println("Detected!!!!");
         report(signupOK);
         Serial.println("+++++++++++++++++++++");
       }

@@ -15,8 +15,12 @@
 #endif
 
 // Insert your network credentials
-#define WIFI_SSID "ICST"
-#define WIFI_PASSWORD "arduino123"
+#define WIFI_SSID "Lior"
+#define WIFI_PASSWORD "N7JDWeey"
+// #define WIFI_SSID "ICST"
+// #define WIFI_PASSWORD "arduino123"
+// #define WIFI_SSID "EhabAzz"
+// #define WIFI_PASSWORD "15011501"
 
 // Insert Firebase project API Key
 #define API_KEY "AIzaSyDz7nN8n9THIGGiV0gd20oPsLGvcyf5w5o"

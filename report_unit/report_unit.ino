@@ -117,7 +117,7 @@ void setup() {
   /* Assign download buffer size in byte */
   // Data to be downloaded will read as multiple chunks with this size, to compromise between speed and memory used for buffering.
   // The memory from external SRAM/PSRAM will not use in the TCP client internal rx buffer.
-  config.fcs.download_buffer_size = 2048;
+  config.fcs.download_buffer_size = 1024;
 
   /* Sign up */
   if (Firebase.signUp(&config, &auth, "", "")) {
@@ -136,7 +136,7 @@ void setup() {
   if (!Firebase.RTDB.beginStream(&stream, "device1/progress/"))
     Serial.printf("sream begin error, %s\n\n", stream.errorReason().c_str());
 
-  Firebase.RTDB.setStreamCallback(&stream, play_audio, streamTimeoutCallback);
+  // Firebase.RTDB.setStreamCallback(&stream, play_audio, streamTimeoutCallback, 1024);
 
   //mp3 seup
   audio.setPinout(I2S_BCLK, I2S_LRC, I2S_DOUT);
@@ -164,12 +164,14 @@ void read_audio_from_firebase() {
     // The file systems for flash and SD/SDMMC can be changed in FirebaseFS.h.
     if (!Firebase.Storage.download(&fbdo, STORAGE_BUCKET_ID /* Firebase Storage bucket id */, "device1" /* path of remote file stored in the bucket */, "/song.mp3" /* path to local file */, mem_storage_type_sd /* memory storage type, mem_storage_type_flash and mem_storage_type_sd */, fcsDownloadCallback /* callback function */))
       Serial.println(fbdo.errorReason());
+
+    delay(10000);
   }
 }
 
 
-void play_audio(FirebaseStream data) {
-  if (is_in_task) return;
+void play_audio() {
+  // if (is_in_task) return;
   is_in_task = true;
   Serial.println("play audio");
   Serial.println(audio.connecttoSD("/song.mp3"));
@@ -182,7 +184,6 @@ void play_audio(FirebaseStream data) {
   audio.stopSong();
   Serial.println("audio.isRunning() after loop:");
   Serial.println(audio.isRunning());
-  delay(10000);
 
   is_in_task = false;
 }
@@ -196,15 +197,33 @@ void streamTimeoutCallback(bool timeout) {
 }
 
 uint run_time = 0;
+bool end_stream = false;
 
 void loop() {
-  // play_audio();
-
+  // if (end_stream) delay(10000);
+  if (!Firebase.ready())
+    return;
   if (millis() - run_time > 20000 && !is_in_task) {
     is_in_task = true;
     run_time = millis();
     read_audio_from_firebase();
-    delay(10000);
     is_in_task = false;
+  } else {
+    if (!Firebase.RTDB.readStream(&stream))
+      Serial.printf("sream read error, %s\n\n", stream.errorReason().c_str());
+
+    if (stream.streamAvailable()) {
+      if (end_stream) {
+        end_stream = false;
+      } else {
+        Serial.printf("Got stream!!\n");
+        play_audio();
+        Firebase.RTDB.endStream(&stream);
+        if (!Firebase.RTDB.beginStream(&stream, "device1/progress/"))
+          Serial.printf("sream begin error, %s\n\n", stream.errorReason().c_str());
+        end_stream = true;
+        delay(10000);
+      }
+    }
   }
 }

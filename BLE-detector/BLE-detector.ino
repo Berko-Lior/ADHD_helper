@@ -1,7 +1,3 @@
-/*
-   Based on Neil Kolban example for IDF: https://github.com/nkolban/esp32-snippets/blob/master/cpp_utils/tests/BLE%20Tests/SampleScan.cpp
-   Ported to Arduino ESP32 by Evandro Copercini
-*/
 #include <sstream>
 #include "report_helper.h"
 
@@ -10,17 +6,12 @@
 #include <BLEScan.h>
 #include <BLEAdvertisedDevice.h>
 
-#if defined(ESP32)
-  #include <WiFi.h>
-#endif
+#include <WiFiManager.h>
 
-// Insert your network credentials
-#define WIFI_SSID "Lior"
-#define WIFI_PASSWORD "N7JDWeey"
-// #define WIFI_SSID "ICST"
-// #define WIFI_PASSWORD "arduino123"
-// #define WIFI_SSID "EhabAzz"
-// #define WIFI_PASSWORD "15011501"
+HardwareSerial Sender(1);   // Define a Serial port instance called 'Sender' using serial port 1
+#define Sender_Txd_pin 17
+#define Sender_Rxd_pin 16
+
 
 // Insert Firebase project API Key
 #define API_KEY "AIzaSyDz7nN8n9THIGGiV0gd20oPsLGvcyf5w5o"
@@ -30,32 +21,20 @@
 
 FirebaseAuth auth;
 FirebaseConfig config;
-
 bool signupOK = false;
 
-/*  Duration of BLE scan
-
-    ==============                  ==============                   ==============
-    =   WINDOW   =  ===INTERVAL===  =   WINDOW   =  ===INTERVAL===   =   WINDOW   =
-    ==============                  ==============                   ==============
-    ===============================================================================
-    =                                  SCAN TIME                                  =
-    ===============================================================================
-*/
 #define SCAN_TIME       1  // seconds
 #define INTERVAL_TIME   200   // (mSecs)
 #define WINDOW_TIME     100   // less or equal setInterval value
 
-BLEScan* pBLEScan;
+#define USER_EMAIL "adhd.helper11@gmail.com"
+#define USER_PASSWORD "123456"
 
+BLEScan* pBLEScan;
 String deviceName;
 String deviceAddress;
 int16_t deviceRSSI;
 uint16_t countDevice;
-
-
-boolean check;
-int count_stable = 0; 
 
 class MyAdvertisedDeviceCallbacks: public BLEAdvertisedDeviceCallbacks {
     void onResult(BLEAdvertisedDevice advertisedDevice) {
@@ -66,27 +45,34 @@ class MyAdvertisedDeviceCallbacks: public BLEAdvertisedDeviceCallbacks {
 
 void setup() {
   Serial.begin(115200);
+  Sender.begin(115200, SERIAL_8N1, Sender_Txd_pin, Sender_Rxd_pin); // Define and start Sender serial port
   Serial.println("BLEDevice init...");
 
-  //wifi initialization and connect.
-  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
-  Serial.print("Connecting to Wi-Fi");
-  while (WiFi.status() != WL_CONNECTED){
-    Serial.print(".");
-    delay(300);
+  WiFi.useStaticBuffers(true);
+ 
+  WiFi.mode(WIFI_STA);
+  WiFi.disconnect(1);
+
+  WiFiManager wm;
+  bool res = wm.autoConnect("ADHD Helper");
+  if (!res) {
+    Serial.println("Failed to connect");
+    // ESP.restart();
+  } else {
+    //if you get here you have connected to the WiFi
+    Serial.println("connected...yeey :)");
   }
-  Serial.println();
-  Serial.print("Connected with IP: ");
-  Serial.println(WiFi.localIP());
-  Serial.println();
 
   // Firebase config and signup
-  
   /* Assign the api key (required) */
   config.api_key = API_KEY;
 
   /* Assign the RTDB URL (required) */
   config.database_url = DATABASE_URL;
+
+  /* Assign the user sign in credentials */
+  auth.user.email = USER_EMAIL;
+  auth.user.password = USER_PASSWORD;
 
   /* Sign up */
   if (Firebase.signUp(&config, &auth, "", "")){
@@ -121,10 +107,8 @@ void loop() {
   {
     BLEAdvertisedDevice d = foundDevices.getDevice(i);
 
-    if (d.getName() == "Mi Smart Band 5") {
-      check = true;
-      count_stable =0;
-       
+    if (d.getName() == "Mi Smart Band 5") 
+    {
       char deviceBuffer[100];
       deviceName = d.getName().c_str();
       deviceAddress = d.getAddress().toString().c_str();
@@ -133,29 +117,13 @@ void loop() {
       if (deviceAddress == "ed:9a:29:07:bd:69" && deviceRSSI > -45)  
       {
         Serial.println("+++++++++++++++++++++");        
-        Serial.println("Detected!!!!");
+        Serial.println("Detected!!!!");                              // Set an example value
+        Sender.print(42.42);
         report(signupOK);
-        Serial.println("+++++++++++++++++++++");
-      }
-      else
-      {
-        Serial.println("---------------");
-        Serial.println("OFF");
-        Serial.println("---------------");
-      }
-      //---------------------------------------------------------Check if not found Mi Band-------------------------------------
-    }else if(i == count-1 && check == false){
-      count_stable +=1;
-      if(count_stable ==20){ // set limit to reset counter
-        count_stable =0;
-      }
-      Serial.println(count_stable);
-      if(count_stable == 4){ //set quantity of scan cycle for accept missing Mi Band
-        Serial.println("Not Found");
+        delay(10000);
+        Serial.println("----------------------");
       }
     }
-      check = false;
-      //---------------------------------------------------------------------------------------------------------------------------
   }
   pBLEScan->clearResults();
 }

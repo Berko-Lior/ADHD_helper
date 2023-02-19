@@ -9,7 +9,7 @@
 #include "addons/RTDBHelper.h"
 
 //Define Firebase Data object
-FirebaseData fbdo;
+FirebaseData fbdo1;
 
 unsigned long sendDataPrevMillis = 0;
 
@@ -18,26 +18,27 @@ void report(bool signupOK){
     sendDataPrevMillis = millis();
 
     // Read the current progress
-    if (Firebase.RTDB.getInt(&fbdo, "device1/progress/")) {
-      if (fbdo.dataType() == "int") {
-        int currProgress = fbdo.intData();
+    if (Firebase.RTDB.getInt(&fbdo1, "device1/progress/")) {
+      Serial.println(fbdo1.intData());
+      if (fbdo1.dataType() == "int") {
+        int currProgress = fbdo1.intData();
         Serial.println(currProgress);
 
         // Write an Float number on the database path test/count/float
-        if (Firebase.RTDB.setFloat(&fbdo, "device1/progress/", currProgress +1)){
+        if (Firebase.RTDB.setIntAsync(&fbdo1, "device1/progress/", currProgress +1)){
           Serial.println("PASSED");
-          Serial.println("PATH: " + fbdo.dataPath());
-          Serial.println("TYPE: " + fbdo.dataType());
+          Serial.println("PATH: " + fbdo1.dataPath());
+          Serial.println("TYPE: " + fbdo1.dataType());
         }
         else {
           Serial.println("FAILED");
-          Serial.println("REASON: " + fbdo.errorReason());
+          Serial.println("REASON: " + fbdo1.errorReason());
         }
       }
     }
     else {
       Serial.println("FAILED");
-      Serial.println("REASON: " + fbdo.errorReason());
+      Serial.println("REASON: " + fbdo1.errorReason());
     }
   }
 }

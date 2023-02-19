@@ -1,10 +1,7 @@
-// #include <sstream>
-
 #define SCAN_TIME 1        // seconds
 #define INTERVAL_TIME 200  // (mSecs)
 #define WINDOW_TIME 100    // less or equal setInterval value
 #include <WiFiManager.h>
-
 
 // Digital I/O used
 #define SD_CS 5
@@ -18,7 +15,6 @@
 
 // storage includs and vars
 #include <Arduino.h>
-// #include <WiFi.h>
 #include <Firebase_ESP_Client.h>
 
 // Provide the token generation process info.
@@ -35,15 +31,10 @@
 #include "SD.h"
 #include "FS.h"
 
-Audio audio;
+HardwareSerial Receiver(2); // Define a Serial port instance called 'Receiver' using serial port 2
 
-/* 1. Define the WiFi credentials */
-// #define WIFI_SSID "ICST"
-// #define WIFI_PASSWORD "arduino123"
-// #define WIFI_SSID "Lior"
-// #define WIFI_PASSWORD "N7JDWeey"
-// #define WIFI_SSID "Haviva539"
-// #define WIFI_PASSWORD "0542447787"
+#define Receiver_Txd_pin 17
+#define Receiver_Rxd_pin 16
 
 /* 2. Define the API Key */
 #define API_KEY "AIzaSyDz7nN8n9THIGGiV0gd20oPsLGvcyf5w5o"
@@ -58,9 +49,11 @@ Audio audio;
 // // Insert RTDB URLefine the RTDB URL */
 #define DATABASE_URL "https://adhd-helper-bdfeb-default-rtdb.firebaseio.com/"
 
+
+Audio audio;
+
 // Define Firebase Data object
 FirebaseData fbdo;
-FirebaseData stream;
 FirebaseAuth auth;
 FirebaseConfig config;
 bool signupOK = false;
@@ -68,8 +61,12 @@ bool is_in_task = false;
 
 void setup() {
   Serial.begin(115200);
+  // Define and start Receiver serial port
+  Receiver.begin(115200, SERIAL_8N1, Receiver_Txd_pin, Receiver_Rxd_pin);
+
   //wifi setup
   WiFi.mode(WIFI_STA);
+  WiFi.disconnect(1);
   WiFiManager wm;
   bool res = wm.autoConnect("ADHD Helper");
   if (!res) {
@@ -84,23 +81,10 @@ void setup() {
   pinMode(SD_CS, OUTPUT);
   digitalWrite(SD_CS, HIGH);
   SPI.begin(SPI_SCK, SPI_MISO, SPI_MOSI);
-  if (!SD.begin(SD_CS, SPI)) {
+  while (!SD.begin(SD_CS, SPI)) {
     Serial.println("Error talking to SD card!");
-    while (true)
-      ;  // end program
+     (true);  // end program
   }
-
-  // storage setup
-  // WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
-  // Serial.print("Connecting to Wi-Fi");
-  // while (WiFi.status() != WL_CONNECTED) {
-  //   Serial.print(".");
-  //   delay(300);
-  // }
-  // Serial.println();
-  // Serial.print("Connected with IP: ");
-  // Serial.println(WiFi.localIP());
-  // Serial.println();
 
   Serial.printf("Firebase Client v%s\n\n", FIREBASE_CLIENT_VERSION);
 
@@ -132,12 +116,7 @@ void setup() {
 
   Firebase.begin(&config, &auth);
   Firebase.reconnectWiFi(true);
-
-  if (!Firebase.RTDB.beginStream(&stream, "device1/progress/"))
-    Serial.printf("sream begin error, %s\n\n", stream.errorReason().c_str());
-
-  // Firebase.RTDB.setStreamCallback(&stream, play_audio, streamTimeoutCallback, 1024);
-
+  
   //mp3 seup
   audio.setPinout(I2S_BCLK, I2S_LRC, I2S_DOUT);
   audio.setVolume(21);  // 0...21
@@ -162,68 +141,41 @@ void read_audio_from_firebase() {
     Serial.println("\nDownload file...\n");
 
     // The file systems for flash and SD/SDMMC can be changed in FirebaseFS.h.
-    if (!Firebase.Storage.download(&fbdo, STORAGE_BUCKET_ID /* Firebase Storage bucket id */, "device1" /* path of remote file stored in the bucket */, "/song.mp3" /* path to local file */, mem_storage_type_sd /* memory storage type, mem_storage_type_flash and mem_storage_type_sd */, fcsDownloadCallback /* callback function */))
+    if (!Firebase.Storage.download(&fbdo, STORAGE_BUCKET_ID , "device1", "/song.mp3" , mem_storage_type_sd ))
       Serial.println(fbdo.errorReason());
 
     delay(10000);
   }
 }
 
-
 void play_audio() {
   // if (is_in_task) return;
   is_in_task = true;
   Serial.println("play audio");
-  Serial.println(audio.connecttoSD("/song.mp3"));
+  audio.connecttoSD("/song.mp3");
   uint play_time = millis();
-  Serial.println("audio.isRunning() before loop:");
-  Serial.println(audio.isRunning());
   while (millis() - play_time < 10000) {
     audio.loop();
   }
   audio.stopSong();
-  Serial.println("audio.isRunning() after loop:");
-  Serial.println(audio.isRunning());
-
+  Serial.println("end audio");
   is_in_task = false;
 }
 
-void streamTimeoutCallback(bool timeout) {
-  if (timeout)
-    Serial.println("stream timed out, resuming...\n");
-
-  if (!stream.httpConnected())
-    Serial.printf("error code: %d, reason: %s\n\n", stream.httpCode(), stream.errorReason().c_str());
-}
-
 uint run_time = 0;
-bool end_stream = false;
 
 void loop() {
-  // if (end_stream) delay(10000);
-  if (!Firebase.ready())
-    return;
-  if (millis() - run_time > 20000 && !is_in_task) {
+  // if the Receiver sent new characters  
+  if (Receiver.available()) {
+    // Display the Receivers characters
+    float received_temperature = Receiver.parseFloat();
+    Serial.println(received_temperature); 
+    play_audio();
+  }
+  else if (millis() - run_time > 60000 && !is_in_task) {
     is_in_task = true;
     run_time = millis();
     read_audio_from_firebase();
     is_in_task = false;
-  } else {
-    if (!Firebase.RTDB.readStream(&stream))
-      Serial.printf("sream read error, %s\n\n", stream.errorReason().c_str());
-
-    if (stream.streamAvailable()) {
-      if (end_stream) {
-        end_stream = false;
-      } else {
-        Serial.printf("Got stream!!\n");
-        play_audio();
-        Firebase.RTDB.endStream(&stream);
-        if (!Firebase.RTDB.beginStream(&stream, "device1/progress/"))
-          Serial.printf("sream begin error, %s\n\n", stream.errorReason().c_str());
-        end_stream = true;
-        delay(10000);
-      }
-    }
-  }
+  } 
 }

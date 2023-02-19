@@ -37,6 +37,7 @@ void report(bool signupOK){
       }
     }
     else {
+      Serial.println("xxx");
       Serial.println("FAILED");
       Serial.println("REASON: " + fbdo1.errorReason());
     }

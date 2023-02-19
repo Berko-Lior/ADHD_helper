@@ -45,14 +45,14 @@ class MyAdvertisedDeviceCallbacks: public BLEAdvertisedDeviceCallbacks {
 
 void setup() {
   Serial.begin(115200);
-  Sender.begin(115200, SERIAL_8N1, Sender_Txd_pin, Sender_Rxd_pin); // Define and start Sender serial port
+  // Define and start Sender serial port
+  Sender.begin(115200, SERIAL_8N1, Sender_Txd_pin, Sender_Rxd_pin);
   Serial.println("BLEDevice init...");
 
-  WiFi.useStaticBuffers(true);
- 
+  //wifi setup
+  // WiFi.useStaticBuffers(true);
   WiFi.mode(WIFI_STA);
-  WiFi.disconnect(1);
-
+  // WiFi.disconnect(1);
   WiFiManager wm;
   bool res = wm.autoConnect("ADHD Helper");
   if (!res) {
